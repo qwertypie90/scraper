@@ -1,6 +1,7 @@
 // Dependencies
 var express = require("express");
 var mongojs = require("mongojs");
+var mongoose = require('mongoose');
 var bodyParser = require("body-parser");
 // Require request and cheerio. This makes the scraping possible
 var request = require("request");
@@ -87,6 +88,38 @@ app.get("/all", function(req, res) {
             res.json(found);
         }
     });
+});
+
+// Retrieve data from the db that's been saved
+app.get("/saved", function(req, res) {
+  // Find all results from the scrapedData collection in the db
+  db.scrapedData.find({}, function(error, found) {
+    // Throw any errors to the console
+    if (error) {
+      console.log(error);
+    }
+    // If there are no errors, send the data to the browser as json
+    else {
+      res.json(found);
+    }
+  });
+});
+
+// Handle form submission, save submission to mongo
+app.post("/saved", function(req, res) {
+  console.log(req.body);
+  // Insert the note into the notes collection
+  db.collections.insert(req.body, function(error, saved) {
+    // Log any errors
+    if (error) {
+      console.log(error);
+    }
+    // Otherwise, send the note back to the browser
+    // This will fire off the success function of the ajax request
+    else {
+      res.send(saved);
+    }
+  });
 });
 
 app.listen(port, function() {
