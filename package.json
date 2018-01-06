@@ -1,0 +1,29 @@
+{
+  "name": "scraper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qwertypie90/scraper.git"
+  },
+  "author": "Lindsey McDowell",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qwertypie90/scraper/issues"
+  },
+  "homepage": "https://github.com/qwertypie90/scraper#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cheerio": "^1.0.0-rc.2",
+    "express": "^4.16.2",
+    "express-handlebars": "^3.0.0",
+    "mongojs": "^2.4.1",
+    "mongoose": "^5.0.0-rc2",
+    "nodemon": "^1.14.7",
+    "request": "^2.83.0"
+  }
+}
