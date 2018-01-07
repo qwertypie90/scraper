@@ -106,10 +106,10 @@ app.get("/saved", function(req, res) {
 });
 
 // Handle form submission, save submission to mongo
-app.post("/saved", function(req, res) {
+app.post("/submit", function(req, res) {
   console.log(req.body);
   // Insert the note into the notes collection
-  db.collections.insert(req.body, function(error, saved) {
+  db.scrapedData.insert(req.body, function(error, saved) {
     // Log any errors
     if (error) {
       console.log(error);
