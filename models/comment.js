@@ -8,7 +8,11 @@ var Schema = mongoose.Schema;
 var CommentSchema = new Schema({
 
   // Comment Content
-  content: {
+  body: {
+    type: String
+  },
+    // Comment Content
+  article: {
     type: String
   }
   

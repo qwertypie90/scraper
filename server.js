@@ -29,12 +29,31 @@ app.get('/', function(req, res) {
 
 // Database configuration
 var databaseUrl = "scraper";
-var collections = ["scrapedData"];
+var collections = ["articles"];
 
 // Hook mongojs configuration to the db variable
 var db = mongojs(databaseUrl, collections);
 db.on("error", function(error) {
     console.log("Database Error:", error);
+});
+
+// Requiring Note and Article models
+var Comment = require("./models/comment.js");
+var Article = require("./models/article.js");
+
+// Database configuration with mongoose
+mongoose.connect("mongodb://heroku_frgw9d9f:p3h11sk9b0onmjnnjrva5gto5n@ds245357.mlab.com:45357/heroku_frgw9d9f");
+//mongoose.connect("mongodb://localhost/mongoscraper");
+var db2 = mongoose.connection;
+
+// Show any mongoose errors
+db2.on("error", function(error) {
+    console.log("Mongoose Error: ", error);
+});
+
+// Once logged in to the db through mongoose, log a success message
+db2.once("open", function() {
+    console.log("Mongoose connection successful.");
 });
 
 
@@ -78,7 +97,7 @@ app.get("/scrape", function(req, res) {
 // Retrieve data from the db
 app.get("/all", function(req, res) {
     // Find all results from the scrapedData collection in the db
-    db.scrapedData.find({}, function(error, found) {
+    db.articles.find({}, function(error, found) {
         // Throw any errors to the console
         if (error) {
             console.log(error);
@@ -92,35 +111,103 @@ app.get("/all", function(req, res) {
 
 // Retrieve data from the db that's been saved
 app.get("/saved", function(req, res) {
-  // Find all results from the scrapedData collection in the db
-  db.scrapedData.find({}, function(error, found) {
-    // Throw any errors to the console
-    if (error) {
-      console.log(error);
-    }
-    // If there are no errors, send the data to the browser as json
-    else {
-      res.json(found);
-    }
-  });
+    // Find all results from the scrapedData collection in the db
+    db.articles.find({}, function(error, found) {
+        // Throw any errors to the console
+        if (error) {
+            console.log(error);
+        }
+        // If there are no errors, send the data to the browser as json
+        else {
+            res.json(found);
+        }
+    });
 });
 
 // Handle form submission, save submission to mongo
-app.post("/submit", function(req, res) {
-  console.log(req.body);
-  // Insert the note into the notes collection
-  db.scrapedData.insert(req.body, function(error, saved) {
-    // Log any errors
-    if (error) {
-      console.log(error);
-    }
-    // Otherwise, send the note back to the browser
-    // This will fire off the success function of the ajax request
-    else {
-      res.send(saved);
-    }
-  });
+// app.post("/submit", function(req, res) {
+//   console.log(req.body);
+//   // Insert the note into the notes collection
+//   db.scrapedData.insert(req.body, function(error, saved) {
+//     // Log any errors
+//     if (error) {
+//       console.log(error);
+//     }
+//     // Otherwise, send the note back to the browser
+//     // This will fire off the success function of the ajax request
+//     else {
+//       res.send(saved);
+//     }
+//   });
+// });
+
+// Create a Comment
+app.post("/comments/save/:id", function(req, res) {
+    // Create a new note and pass the req.body to the entry
+    var newComment = new Comment({
+        body: req.body.text,
+        article: req.params.id
+    });
+    console.log("hey", req.body)
+    // And save the new note the db
+    newComment.save(function(error, comment) {
+        // Log any errors
+        console.log(comment)
+        if (error) {
+            console.log(error);
+        }
+        // Otherwise
+        else {
+            // Use the article id to find and update it's notes
+            // Yann LeCun – Deep Learning Is Dead. Long Live Differentiable Programming
+            // console.log(req.params.id)
+            Article.find({ '_id': "5a50209425b5a537f7139b8a" }, (err, doc) => {
+              console.log(doc)
+            })
+
+            /*
+            db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $push: {'comments': newComment}}, function(err, doc) {
+              console.log(doc)
+                // Log any errors
+                if (err) {
+                    console.log(err);
+                    res.send(err);
+                } else {
+                    // Or send the note to the browser
+                    res.send(newComment);
+                }
+            });
+            */
+        }
+    });
 });
+
+// Delete a comment
+// app.delete("/comments/delete/:note_id/:article_id", function(req, res) {
+//   // Use the note id to find and delete it
+//   Note.findOneAndRemove({ "_id": req.params.note_id }, function(err) {
+//     // Log any errors
+//     if (err) {
+//       console.log(err);
+//       res.send(err);
+//     }
+//     else {
+//       Article.findOneAndUpdate({ "_id": req.params.article_id }, {$pull: {"notes": req.params.note_id}})
+//        // Execute the above query
+//         .exec(function(err) {
+//           // Log any errors
+//           if (err) {
+//             console.log(err);
+//             res.send(err);
+//           }
+//           else {
+//             // Or send the note to the browser
+//             res.send("Note Deleted");
+//           }
+//         });
+//     }
+//   });
+// });
 
 app.listen(port, function() {
     console.log("Listening on PORT " + port);

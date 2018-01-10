@@ -35,7 +35,7 @@ var ArticleSchema = new Schema({
     ref: 'Comment'
   }]
 
-});
+}, { collection: 'article' });
 
 // Create the Article model with Mongoose
 var Article = mongoose.model('Article', ArticleSchema);

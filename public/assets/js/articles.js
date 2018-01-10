@@ -47,39 +47,36 @@ $(document).ready(function() {
 
         BootstrapDialog.show({
             title: 'Add Comment For ' + important,
-            message: $('<textarea class="form-control" placeholder="Add your comment for this article here..."></textarea>'),
+            message: $('<textarea class="form-control" id = "message" placeholder="Add your comment for this article here..."></textarea>'),
             buttons: [{
                 label: 'Save Comment',
                 cssClass: 'btn-primary',
                 hotkey: 13, // Enter.
                 action: function() {
+                    //Handle Save Note button
                     $.ajax({
-                            type: "POST",
-                            dataType: "json",
-                            url: "/submit",
-                            data: {
-                                newC: $("form-control").val(),
-                                created: Date.now()
-                            }
-                        })
-                        // If that API call succeeds, add the title and a delete button for the note to the page
-                        .done(function(data) {
-                            BootstrapDialog.closeAll();
-                            
-                            // dynamically fetch the id of tr, .xyz from the clicked element.
-                            console.log(trToReplace);
-                            $(trToReplace).append("<td><input type='button'value='Edit Comment' class='editBtn' id='" + important + "'/></td><td><input type='button'value='Delete Comment' class='deleteBtn' id='" + important + "'/></td>");
-
-                        });
+                        method: "POST",
+                        dataType: "json",
+                        url: "/comments/save/" +important,
+                        data: {
+                            text: $("#message").val()
+                        }
+                    }).done(function(data) {
+                        BootstrapDialog.closeAll();
+                        // Log the response
+                        // console.log(data);
+                        // console.log($("#message"))
+                        // window.location = "/saved"
+                        // dynamically fetch the id of tr, .xyz from the clicked element.
+                        // console.log(trToReplace);
+                        $(trToReplace).append("<td><input type='button'value='Edit Comment' class='editBtn' id='" + important + "'/></td><td><input type='button'value='Delete Comment' class='deleteBtn' id='" + important + "'/></td>");
+                    });
 
                 }
             }]
         });
 
-
-
     });
-
 
 
 });
