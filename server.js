@@ -148,7 +148,9 @@ app.post("/comments/save/:id", function(req, res) {
         body: req.body.text,
         article: req.params.id
     });
-    console.log("hey", req.body)
+    // console.log("hey", req.body)
+    console.log(req.params._id)
+    console.log(req.params.comments)
     // And save the new note the db
     newComment.save(function(error, comment) {
         // Log any errors
@@ -161,11 +163,13 @@ app.post("/comments/save/:id", function(req, res) {
             // Use the article id to find and update it's notes
             // Yann LeCun – Deep Learning Is Dead. Long Live Differentiable Programming
             // console.log(req.params.id)
+            /*
             Article.find({ '_id': "5a50209425b5a537f7139b8a" }, (err, doc) => {
               console.log(doc)
             })
+            */
 
-            /*
+            
             db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $push: {'comments': newComment}}, function(err, doc) {
               console.log(doc)
                 // Log any errors
@@ -177,37 +181,62 @@ app.post("/comments/save/:id", function(req, res) {
                     res.send(newComment);
                 }
             });
-            */
         }
     });
 });
 
+// Select just one note by an id
+app.get("/find/:id", function(req, res) {
+
+  // When searching by an id, the id needs to be passed in
+  // as (mongojs.ObjectId(IDYOUWANTTOFIND))
+
+  // Find just one result in the notes collection
+  db.articles.findOne({
+    // Using the id in the url
+    "_id": mongojs.ObjectId(req.params.id)
+  }, function(error, found) {
+    // log any errors
+    if (error) {
+      console.log(error);
+      res.send(error);
+    }
+    // Otherwise, send the note to the browser
+    // This will fire off the success function of the ajax request
+    else {
+      // console.log(found);
+      res.send(found.comments);
+    }
+  });
+});
+
 // Delete a comment
-// app.delete("/comments/delete/:note_id/:article_id", function(req, res) {
-//   // Use the note id to find and delete it
-//   Note.findOneAndRemove({ "_id": req.params.note_id }, function(err) {
-//     // Log any errors
-//     if (err) {
-//       console.log(err);
-//       res.send(err);
-//     }
-//     else {
-//       Article.findOneAndUpdate({ "_id": req.params.article_id }, {$pull: {"notes": req.params.note_id}})
-//        // Execute the above query
-//         .exec(function(err) {
-//           // Log any errors
-//           if (err) {
-//             console.log(err);
-//             res.send(err);
-//           }
-//           else {
-//             // Or send the note to the browser
-//             res.send("Note Deleted");
-//           }
-//         });
-//     }
-//   });
-// });
+app.delete("/comments/delete/:_id/:comment_id", function(req, res) {
+
+  // Use the note id to find and delete it
+Comment.findOneAndRemove({ "_id": req.params.comment_id }, function(err) {
+    // Log any errors
+    if (err) {
+      console.log(err);
+      res.send(err);
+    }
+    else {
+      Article.update({ "_id": req.params.article_id }, {$pull: {"comments": req.params.comment_id}})
+       // Execute the above query
+        .exec(function(err) {
+          // Log any errors
+          if (err) {
+            console.log(err);
+            res.send(err);
+          }
+          else {
+            // Or send the note to the browser
+            res.send("Comment Deleted");
+          }
+        });
+    }
+  });
+});
 
 app.listen(port, function() {
     console.log("Listening on PORT " + port);

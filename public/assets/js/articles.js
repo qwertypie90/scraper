@@ -1,82 +1,179 @@
 $(document).ready(function() {
 
-    var articleContainer = $("tbody");
-    var articles;
+var articleContainer = $("tbody");
+var articles;
 
-    function scrape(articles) {
-        event.preventDefault();
-        $("tbody").empty();
-        $.getJSON("/all", function(data) {
-            articles = data;
-            if (!articles || !articles.length) {
-                console.log("NOTHING")
-            } else {
-                initializeRows(articles);
-            }
-        });
-    }
-
-    // Handling the building/display of rows
-    function initializeRows(articles) {
-        for (var i = 0; i < articles.length; i++) {
-            var articleId = articles[i]._id;
-            var title = articles[i].title;
-            var link = articles[i].link;
-
-            var tempRow = $("<tr class = 'xyz' id= " + i + ">")
-            var tableInfo = "<td>" + title + "</td><td>" + link + "</td><td><input type='button'value='Add Comment' class='addBtns' id=" + articles[i]._id + "></td></tr>";
-
-            tempRow.append(tableInfo)
-
-            articleContainer.append(tempRow)
-
+function scrape(articles) {
+    event.preventDefault();
+    $("tbody").empty();
+    $.getJSON("/all", function(data) {
+        articles = data;
+        if (!articles || !articles.length) {
+            console.log("NOTHING")
+        } else {
+            initializeRows(articles);
         }
-    }
-
-    $("#scrape").on("click", function(event) {
-        // Make sure to preventDefault on a submit event.
-        event.preventDefault();
-        scrape()
-    })
-
-    $(document).on("click", ".addBtns", function(articles) {
-        event.preventDefault();
-        console.log("button works")
-        var important = $(this).attr("id");
-        var trToReplace = $(this).closest("tr.xyz");
-
-        BootstrapDialog.show({
-            title: 'Add Comment For ' + important,
-            message: $('<textarea class="form-control" id = "message" placeholder="Add your comment for this article here..."></textarea>'),
-            buttons: [{
-                label: 'Save Comment',
-                cssClass: 'btn-primary',
-                hotkey: 13, // Enter.
-                action: function() {
-                    //Handle Save Note button
-                    $.ajax({
-                        method: "POST",
-                        dataType: "json",
-                        url: "/comments/save/" +important,
-                        data: {
-                            text: $("#message").val()
-                        }
-                    }).done(function(data) {
-                        BootstrapDialog.closeAll();
-                        // Log the response
-                        // console.log(data);
-                        // console.log($("#message"))
-                        // window.location = "/saved"
-                        // dynamically fetch the id of tr, .xyz from the clicked element.
-                        // console.log(trToReplace);
-                        $(trToReplace).append("<td><input type='button'value='Edit Comment' class='editBtn' id='" + important + "'/></td><td><input type='button'value='Delete Comment' class='deleteBtn' id='" + important + "'/></td>");
-                    });
-
-                }
-            }]
-        });
-
     });
+}
+
+// Handling the building/display of rows
+function initializeRows(articles) {
+    for (var i = 0; i < articles.length; i++) {
+        var articleId = articles[i]._id;
+        var title = articles[i].title;
+        var link = articles[i].link;
+
+        var tempRow = $("<tr class = 'xyz' id= " + i + ">")
+        var tableInfo = "<td>" + title + "</td><td>" + link + "</td><td><input type='button'value='Add Comment' class='addBtns' id=" + articles[i]._id + "></td></tr>";
+
+        tempRow.append(tableInfo)
+
+        articleContainer.append(tempRow)
+
+    }
+}
+
+$("#scrape").on("click", function(event) {
+    // Make sure to preventDefault on a submit event.
+    event.preventDefault();
+    scrape()
+})
+
+
+$(document).on("click", ".addBtns", function(articles) {
+    event.preventDefault();
+    console.log("button works")
+    var important = $(this).attr("id");
+    var commentID;
+    var trToReplace = $(this).closest("tr.xyz");
+
+    BootstrapDialog.show({
+        title: 'Add Comment For ' + important,
+        message: $('<textarea class="form-control" id = "message" placeholder="Add your comment for this article here..."></textarea>'),
+        buttons: [{
+            label: 'Save Comment',
+            cssClass: 'btn-primary',
+            hotkey: 13, // Enter.
+            action: function() {
+                //Handle Save Note button
+                $.ajax({
+                    method: "POST",
+                    dataType: "json",
+                    url: "/comments/save/" + important,
+                    data: {
+                        text: $("#message").val()
+                    }
+                }).done(function(data) {
+                    BootstrapDialog.closeAll();
+                    // Log the response
+                    // console.log(data);
+                    // console.log(commentID)
+                    commentID = data._id
+                    // console.log($("#message"))
+                    // window.location = "/saved"
+                    // dynamically fetch the id of tr, .xyz from the clicked element.
+                    console.log(trToReplace[0]);
+                    $(trToReplace).append("<td><input type='button'value='Edit Comment' data-name = " + commentID + " class='editBtn' id='" + important + "'/></td><td><input type='button'value='Delete Comment' data-name= " + commentID + " class='deleteBtn' id='" + important + "'/></td>");
+                });
+
+            }
+        }]
+    });
+
+});
+
+
+
+$(document).on("click", ".editBtn", function(articles) {
+    var id = $(this).attr("id")
+    var comments = [];
+    var articleId = [];
+    var buttons = [];
+    console.log(id)
+    // console.log("HELLO")
+
+    $.ajax({
+        type: "GET",
+        url: "/find/" + id,
+        success: function(data) {
+            // console.log(data)
+
+
+            for (var i = 0; i < data.length; i++) {
+                comments.push(data[i].body)
+                articleId.push(data[i]._id)
+                var a = $("<button>");
+                // Adding a class of celeb to our button
+                a.addClass("comment");
+                // Adding a data-attribute
+                a.attr("data-ID", articleId[i]);
+                // Providing the initial button text
+                a.text(comments[i]);
+                buttons.push(a)
+            }
+
+
+            // comments.join('\r\n')
+
+            BootstrapDialog.show({
+                title: 'Comment(s)',
+                message: buttons,
+                buttons: [{
+                    label: "EDIT?(COMINGSOON)",
+                    action: function(dialogItself) {
+                        dialogItself.close();
+                    }
+                }]
+            });
+
+
+            // Fill the inputs with the data that the ajax call collected
+            // $("#note").val(data.note);
+            // $("#title").val(data.title);
+            // Make the #actionbutton an update button, so user can
+            // Update the note s/he chooses
+            // $("#actionbutton").html("<button id='updater' data-id='" + data._id + "'>Update</button>");
+        }
+    });
+    // if there are =2 or more comments then show bootstrap dialog as folows
+
+    //     if there is one comment show this
+
+
 
 
 });
+
+$(document).on("click", ".deleteBtn", function() {
+        var eyeD = $(this).attr("id")
+        var comId = $(this).attr("data-name")
+
+
+        BootstrapDialog.confirm({
+            title: 'WARNING',
+            message: 'Warning! Delete this comment?',
+            type: BootstrapDialog.TYPE_WARNING, // <-- Default value is BootstrapDialog.TYPE_PRIMARY
+            closable: true, // <-- Default value is false
+            draggable: true, // <-- Default value is false
+            btnCancelLabel: 'Do not drop it!', // <-- Default value is 'Cancel',
+            btnOKLabel: 'Drop it!', // <-- Default value is 'OK',
+            btnOKClass: 'btn-warning', // <-- If you didn't specify it, dialog type will be used,
+            callback: function(result) {
+                // result will be true if button was click, while it will be false if users close the dialog directly.
+                if (result) {
+                    alert('Comment Deleted.');
+                    $.ajax({
+                        method: "DELETE",
+                        url: "/comments/delete/" + eyeD + "/" + comId
+                    }).done(function(data) {
+                        console.log(data)
+
+                    })
+                } else {
+                    alert('Nope.');
+                }
+            }
+        });
+});
+
+})
