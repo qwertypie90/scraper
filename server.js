@@ -119,6 +119,7 @@ app.get("/saved", function(req, res) {
         }
         // If there are no errors, send the data to the browser as json
         else {
+            console.log(found)
             res.json(found);
         }
     });
@@ -141,6 +142,7 @@ app.get("/saved", function(req, res) {
 //   });
 // });
 
+var commID;
 // Create a Comment
 app.post("/comments/save/:id", function(req, res) {
     // Create a new note and pass the req.body to the entry
@@ -149,8 +151,6 @@ app.post("/comments/save/:id", function(req, res) {
         article: req.params.id
     });
     // console.log("hey", req.body)
-    console.log(req.params._id)
-    console.log(req.params.comments)
     // And save the new note the db
     newComment.save(function(error, comment) {
         // Log any errors
@@ -179,6 +179,9 @@ app.post("/comments/save/:id", function(req, res) {
                 } else {
                     // Or send the note to the browser
                     res.send(newComment);
+                    // console.log(req)
+                    commID=comment.id
+                    // console.log(comment.id)
                 }
             });
         }
@@ -205,7 +208,7 @@ app.get("/find/:id", function(req, res) {
     // This will fire off the success function of the ajax request
     else {
       // console.log(found);
-      res.send(found.comments);
+      res.send(found);
     }
   });
 });
@@ -214,16 +217,15 @@ app.get("/find/:id", function(req, res) {
 app.delete("/comments/delete/:_id/:comment_id", function(req, res) {
 
   // Use the note id to find and delete it
-Comment.findOneAndRemove({ "_id": req.params.comment_id }, function(err) {
+db.articles.remove({ "_id": req.params.id }, function(err) {
     // Log any errors
     if (err) {
       console.log(err);
       res.send(err);
     }
     else {
-      Article.update({ "_id": req.params.article_id }, {$pull: {"comments": req.params.comment_id}})
+      db.articles.update({ "_id": req.params.id }, {$pull: {"comments": commID}})
        // Execute the above query
-        .exec(function(err) {
           // Log any errors
           if (err) {
             console.log(err);
@@ -233,7 +235,7 @@ Comment.findOneAndRemove({ "_id": req.params.comment_id }, function(err) {
             // Or send the note to the browser
             res.send("Comment Deleted");
           }
-        });
+        
     }
   });
 });
