@@ -164,7 +164,7 @@ $(document).on("click", ".deleteBtn", function() {
                     alert('Comment Deleted.');
                     $.ajax({
                         method: "DELETE",
-                        url: "/comments/delete/" + eyeD + "/" + comId
+                        url: "/comments/delete/" + comId + "/" + eyeD
                     }).done(function(data) {
                         console.log(data)
 

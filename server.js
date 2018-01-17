@@ -3,6 +3,7 @@ var express = require("express");
 var mongojs = require("mongojs");
 var mongoose = require('mongoose');
 var bodyParser = require("body-parser");
+var ObjectID = require('mongodb').ObjectID; 
 // Require request and cheerio. This makes the scraping possible
 var request = require("request");
 var cheerio = require("cheerio");
@@ -143,6 +144,7 @@ app.get("/saved", function(req, res) {
 // });
 
 var commID;
+var artID;
 // Create a Comment
 app.post("/comments/save/:id", function(req, res) {
     // Create a new note and pass the req.body to the entry
@@ -169,9 +171,12 @@ app.post("/comments/save/:id", function(req, res) {
             })
             */
 
-            
-            db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $push: {'comments': newComment}}, function(err, doc) {
-              console.log(doc)
+            //db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $set: {'comment': newComment}});
+
+
+            db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $push: { 'comments': newComment } }, function(err, doc) {
+                // db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $push: {'comments': newComment}}, function(err, doc) {
+                console.log(doc)
                 // Log any errors
                 if (err) {
                     console.log(err);
@@ -180,10 +185,13 @@ app.post("/comments/save/:id", function(req, res) {
                     // Or send the note to the browser
                     res.send(newComment);
                     // console.log(req)
-                    commID=comment.id
-                    // console.log(comment.id)
+                    // commID = comment.id
+                    artID = comment.article
+                    console.log(artID)
+
                 }
             });
+
         }
     });
 });
@@ -191,53 +199,33 @@ app.post("/comments/save/:id", function(req, res) {
 // Select just one note by an id
 app.get("/find/:id", function(req, res) {
 
-  // When searching by an id, the id needs to be passed in
-  // as (mongojs.ObjectId(IDYOUWANTTOFIND))
+    // When searching by an id, the id needs to be passed in
+    // as (mongojs.ObjectId(IDYOUWANTTOFIND))
 
-  // Find just one result in the notes collection
-  db.articles.findOne({
-    // Using the id in the url
-    "_id": mongojs.ObjectId(req.params.id)
-  }, function(error, found) {
-    // log any errors
-    if (error) {
-      console.log(error);
-      res.send(error);
-    }
-    // Otherwise, send the note to the browser
-    // This will fire off the success function of the ajax request
-    else {
-      // console.log(found);
-      res.send(found);
-    }
-  });
+    // Find just one result in the notes collection
+    db.articles.findOne({
+        // Using the id in the url
+        "_id": mongojs.ObjectId(req.params.id)
+    }, function(error, found) {
+        // log any errors
+        if (error) {
+            console.log(error);
+            res.send(error);
+        }
+        // Otherwise, send the note to the browser
+        // This will fire off the success function of the ajax request
+        else {
+            // console.log(found);
+            res.send(found);
+        }
+    });
 });
 
-// Delete a comment
-app.delete("/comments/delete/:_id/:comment_id", function(req, res) {
-
+// Delete a note
+app.delete("/comments/delete/:comment_id/:article_id", function(req, res) {
   // Use the note id to find and delete it
-db.articles.remove({ "_id": req.params.id }, function(err) {
-    // Log any errors
-    if (err) {
-      console.log(err);
-      res.send(err);
-    }
-    else {
-      db.articles.update({ "_id": req.params.id }, {$pull: {"comments": commID}})
-       // Execute the above query
-          // Log any errors
-          if (err) {
-            console.log(err);
-            res.send(err);
-          }
-          else {
-            // Or send the note to the browser
-            res.send("Comment Deleted");
-          }
-        
-    }
-  });
+db.articles.update({ "_id": ObjectID(artID)}, {$unset: {"comments":1}}, {multi: true}) 
+
 });
 
 app.listen(port, function() {
