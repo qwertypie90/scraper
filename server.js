@@ -3,7 +3,7 @@ var express = require("express");
 var mongojs = require("mongojs");
 var mongoose = require('mongoose');
 var bodyParser = require("body-parser");
-var ObjectID = require('mongodb').ObjectID; 
+var ObjectID = require('mongodb').ObjectID;
 // Require request and cheerio. This makes the scraping possible
 var request = require("request");
 var cheerio = require("cheerio");
@@ -76,24 +76,33 @@ app.get("/scrape", function(req, res) {
 
             // Save the text of the h4-tag as "title"
             var title = $(element).text();
-
             // Find the h4 tag's parent a-tag, and save it's href value as "link"
             var link = $(element).parent().attr("href");
-
-            // Make an object with data we scraped for this h4 and push it to the results array
-            results.push({
-                title: title,
-                link: link
-            });
+                // If this found element had both a title and a link
+      if (title && link) {
+        // Insert the data in the scrapedData db
+        db.articles.insert({
+          title: title,
+          link: link
+        },
+        function(err, inserted) {
+          if (err) {
+            // Log the error if one is encountered during the query
+            console.log(err);
+          }
+          else {
+            // Otherwise, log the inserted data
+            console.log(inserted);
+          }
         });
-
-        // After looping through each h4.headline-link, log the results
-        // console.log(results);
+      }
     });
+  });
 
-    // Send a "Scrape Complete" message to the browser
-    res.send("Scrape Complete");
+  // Send a "Scrape Complete" message to the browser
+  res.send("Scrape Complete");
 });
+
 
 // Retrieve data from the db
 app.get("/all", function(req, res) {
@@ -174,28 +183,26 @@ app.post("/comments/save/:id", function(req, res) {
 // Update a comment
 
 app.put("/update/:id", function(req, res) {
+
     var newComment = new Comment({
         body: req.body.text,
         article: req.params.id
     });
 
-db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $set: { 'comments': newComment } }, function(err, doc) {
+    db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $set: { 'comments': newComment } }, function(err, doc) {
 
-// db.articles.update({ "_id": ObjectId("5a50209425b5a537f7139b8f")}, 
-//         { $set: {'comments': "MEOW"} })
 
+    })
 })
-})
-
 
 
 
 // Delete a note
 app.delete("/comments/delete/:comment_id/:article_id", function(req, res) {
 
-artID = req.params.article_id
-  // Use the note id to find and delete it
-db.articles.update({ "_id": ObjectID(artID)}, {$unset: {"comments":1}}, {multi: true}) 
+    artID = req.params.article_id
+    // Use the note id to find and delete it
+    db.articles.update({ "_id": ObjectID(artID) }, { $unset: { "comments": 1 } }, { multi: true })
 
 });
 

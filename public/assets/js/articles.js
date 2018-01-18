@@ -6,6 +6,17 @@ $(document).ready(function() {
     function scrape(articles) {
         event.preventDefault();
         $("tbody").empty();
+
+        // Scraping Ajax Call
+        // $.ajax({
+        //     method: "GET",
+        //     url: "/scrape",
+        // }).done(function(data) {
+        //     console.log(data)
+        //     window.location = "/"
+        // })
+
+        // Pulling From Our MongoDB
         $.getJSON("/all", function(data) {
             articles = data;
             if (!articles || !articles.length) {
@@ -39,7 +50,7 @@ $(document).ready(function() {
 
             articleContainer.append(tempRow)
         }
-    
+
     }
 
     $("#scrape").on("click", function(event) {
@@ -111,38 +122,39 @@ $(document).ready(function() {
         // console.log("HELLO")
 
 
-                // comments.join('\r\n')
+        // comments.join('\r\n')
 
-                BootstrapDialog.show({
-                    title: 'Comment(s)',
-                    message: $('<textarea class="form-control" id = "message" placeholder="Add your comment for this article here..."></textarea>'),
-                    buttons: [{
-                        label: "EDIT?(COMINGSOON)",
-                        action: function(dialogItself) {
-                            $.ajax({
-                                method: "PUT",
-                                dataType: "json",
-                                url: "/update/" + id,
-                                data: {
-                                    text: $("#message").val()
-                                }})
-                                dialogItself.close();
-                            }
-                        
-                    }]
-                });
+        BootstrapDialog.show({
+            title: 'Comment(s)',
+            message: $('<textarea class="form-control" id = "message" placeholder="Add your comment for this article here..."></textarea>'),
+            buttons: [{
+                label: "EDIT?(COMINGSOON)",
+                action: function(dialogItself) {
+                    $.ajax({
+                        method: "PUT",
+                        dataType: "json",
+                        url: "/update/" + id,
+                        data: {
+                            text: $("#message").val()
+                        }
+                    })
+                    dialogItself.close();
+                }
+
+            }]
+        });
 
 
-                // Fill the inputs with the data that the ajax call collected
-                // $("#note").val(data.note);
-                // $("#title").val(data.title);
-                // Make the #actionbutton an update button, so user can
-                // Update the note s/he chooses
-                // $("#actionbutton").html("<button id='updater' data-id='" + data._id + "'>Update</button>");
-            })
-        // if there are =2 or more comments then show bootstrap dialog as folows
+        // Fill the inputs with the data that the ajax call collected
+        // $("#note").val(data.note);
+        // $("#title").val(data.title);
+        // Make the #actionbutton an update button, so user can
+        // Update the note s/he chooses
+        // $("#actionbutton").html("<button id='updater' data-id='" + data._id + "'>Update</button>");
+    })
+    // if there are =2 or more comments then show bootstrap dialog as folows
 
-        //     if there is one comment show this
+    //     if there is one comment show this
 
 
 
