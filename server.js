@@ -126,25 +126,9 @@ app.get("/saved", function(req, res) {
     });
 });
 
-// Handle form submission, save submission to mongo
-// app.post("/submit", function(req, res) {
-//   console.log(req.body);
-//   // Insert the note into the notes collection
-//   db.scrapedData.insert(req.body, function(error, saved) {
-//     // Log any errors
-//     if (error) {
-//       console.log(error);
-//     }
-//     // Otherwise, send the note back to the browser
-//     // This will fire off the success function of the ajax request
-//     else {
-//       res.send(saved);
-//     }
-//   });
-// });
-
 var commID;
 var artID;
+
 // Create a Comment
 app.post("/comments/save/:id", function(req, res) {
     // Create a new note and pass the req.body to the entry
@@ -162,17 +146,6 @@ app.post("/comments/save/:id", function(req, res) {
         }
         // Otherwise
         else {
-            // Use the article id to find and update it's notes
-            // Yann LeCun – Deep Learning Is Dead. Long Live Differentiable Programming
-            // console.log(req.params.id)
-            /*
-            Article.find({ '_id': "5a50209425b5a537f7139b8a" }, (err, doc) => {
-              console.log(doc)
-            })
-            */
-
-            //db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $set: {'comment': newComment}});
-
 
             db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $push: { 'comments': newComment } }, function(err, doc) {
                 // db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $push: {'comments': newComment}}, function(err, doc) {
@@ -187,7 +160,9 @@ app.post("/comments/save/:id", function(req, res) {
                     // console.log(req)
                     // commID = comment.id
                     artID = comment.article
+                    commID = comment._id
                     console.log(artID)
+                    console.log(commID)
 
                 }
             });
@@ -196,33 +171,29 @@ app.post("/comments/save/:id", function(req, res) {
     });
 });
 
-// Select just one note by an id
-app.get("/find/:id", function(req, res) {
+// Update a comment
 
-    // When searching by an id, the id needs to be passed in
-    // as (mongojs.ObjectId(IDYOUWANTTOFIND))
-
-    // Find just one result in the notes collection
-    db.articles.findOne({
-        // Using the id in the url
-        "_id": mongojs.ObjectId(req.params.id)
-    }, function(error, found) {
-        // log any errors
-        if (error) {
-            console.log(error);
-            res.send(error);
-        }
-        // Otherwise, send the note to the browser
-        // This will fire off the success function of the ajax request
-        else {
-            // console.log(found);
-            res.send(found);
-        }
+app.put("/update/:id", function(req, res) {
+    var newComment = new Comment({
+        body: req.body.text,
+        article: req.params.id
     });
-});
+
+db.articles.update({ "_id": mongoose.Types.ObjectId(req.params.id.toString()) }, { $set: { 'comments': newComment } }, function(err, doc) {
+
+// db.articles.update({ "_id": ObjectId("5a50209425b5a537f7139b8f")}, 
+//         { $set: {'comments': "MEOW"} })
+
+})
+})
+
+
+
 
 // Delete a note
 app.delete("/comments/delete/:comment_id/:article_id", function(req, res) {
+
+artID = req.params.article_id
   // Use the note id to find and delete it
 db.articles.update({ "_id": ObjectID(artID)}, {$unset: {"comments":1}}, {multi: true}) 
 
