@@ -42,15 +42,17 @@ db.on("error", function(error) {
 var Comment = require("./models/comment.js");
 var Article = require("./models/article.js");
 
+
 var uri = 'mongodb://heroku_frgw9d9f:p3h11sk9b0onmjnnjrva5gto5n@ds245357.mlab.com:45357/heroku_frgw9d9f';
 
 mongoose.Promise = global.Promise
 
-mongoose.connect(uri);
+if (process.env.MONGODB_URI) {
+    mongoose.connect(process.env.MONGODB_URI);
+} else {
+    mongoose.connect(uri);
+}
 
-// Database configuration with mongoose
-mongoose.connect("mongodb://heroku_frgw9d9f:p3h11sk9b0onmjnnjrva5gto5n@ds245357.mlab.com:45357/heroku_frgw9d9f");
-//mongoose.connect("mongodb://localhost/mongoscraper");
 var db2 = mongoose.connection;
 
 // Show any mongoose errors
