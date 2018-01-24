@@ -128,7 +128,7 @@ $(document).ready(function() {
             title: 'Comment(s)',
             message: $('<textarea class="form-control" id = "message" placeholder="Add your comment for this article here..."></textarea>'),
             buttons: [{
-                label: "EDIT?(COMINGSOON)",
+                label: "EDIT",
                 action: function(dialogItself) {
                     $.ajax({
                         method: "PUT",
