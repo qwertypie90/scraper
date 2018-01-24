@@ -16,6 +16,7 @@ var port = process.env.PORT || 3000;
 // Use the express.static middleware to serve static content for the app from the "public" directory in the application directory.
 app.use(express.static("public"));
 
+
 // Sets up the Express app to handle data parsing
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -35,6 +36,7 @@ var collections = ["articles"];
 
 // Hook mongojs configuration to the db variable
 var db = mongojs(databaseUrl, collections);
+
 db.on("error", function(error) {
     console.log("Database Error:", error);
 });
@@ -44,23 +46,24 @@ var Comment = require("./models/comment.js");
 var Article = require("./models/article.js");
 
 
-var uri = 'mongodb://heroku_frgw9d9f:p3h11sk9b0onmjnnjrva5gto5n@ds245357.mlab.com:45357/heroku_frgw9d9f';
+// var uri = 'mongodb://heroku_frgw9d9f:p3h11sk9b0onmjnnjrva5gto5n@ds245357.mlab.com:45357/heroku_frgw9d9f';
+var localUri = 'mongodb://localhost:27017/scraper';
 
 if (process.env.MONGODB_URI) {
     mongoose.connect(process.env.MONGODB_URI);
 } else {
-    mongoose.connect(uri);
+    mongoose.connect(localUri);
 }
 
-var db2 = mongoose.connection;
+var mb = mongoose.connection;
 
 // Show any mongoose errors
-db2.on("error", function(error) {
+mb.on("error", function(error) {
     console.log("Mongoose Error: ", error);
 });
 
 // Once logged in to the db through mongoose, log a success message
-db2.once("open", function() {
+mb.once("open", function() {
     console.log("Mongoose connection successful.");
 });
 
