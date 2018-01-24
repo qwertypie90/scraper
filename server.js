@@ -2,6 +2,7 @@
 var express = require("express");
 var mongojs = require("mongojs");
 var mongoose = require('mongoose');
+var mongodb = require('mongodb');
 var bodyParser = require("body-parser");
 var ObjectID = require('mongodb').ObjectID;
 // Require request and cheerio. This makes the scraping possible
@@ -44,8 +45,6 @@ var Article = require("./models/article.js");
 
 
 var uri = 'mongodb://heroku_frgw9d9f:p3h11sk9b0onmjnnjrva5gto5n@ds245357.mlab.com:45357/heroku_frgw9d9f';
-
-mongoose.Promise = global.Promise
 
 if (process.env.MONGODB_URI) {
     mongoose.connect(process.env.MONGODB_URI);
