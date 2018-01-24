@@ -46,11 +46,11 @@ var Comment = require("./models/comment.js");
 var Article = require("./models/article.js");
 
 
-// var uri = 'mongodb://heroku_frgw9d9f:p3h11sk9b0onmjnnjrva5gto5n@ds245357.mlab.com:45357/heroku_frgw9d9f';
+var uri = 'mongodb://heroku_frgw9d9f:p3h11sk9b0onmjnnjrva5gto5n@ds245357.mlab.com:45357/heroku_frgw9d9f';
 var localUri = 'mongodb://localhost:27017/scraper';
 
-if (process.env.MONGODB_URI) {
-    mongoose.connect(process.env.MONGODB_URI);
+if (process.env.uri) {
+    mongoose.connect(process.env.uri);
 } else {
     mongoose.connect(localUri);
 }
